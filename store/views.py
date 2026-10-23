@@ -1,3 +1,5 @@
+from multiprocessing import context
+
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 
@@ -16,7 +18,7 @@ def store(request, category_slug=None):
         page = request.GET.get('page')
         page_products = paginator.get_page(page)
     else:
-        products = Product.objects.filter(is_available=True)
+        products = Product.objects.filter(is_available=True).order_by('-id')
         paginator = Paginator(products, 4)
         page = request.GET.get('page')
         page_products = paginator.get_page(page)
@@ -48,3 +50,18 @@ def product_detail(request, category_slug, product_slug):
         
     }
     return render(request, 'store/product_detail.html', context)
+
+
+
+def search(request):
+    if 'keyword' in request.GET:
+        keyword=request.GET['keyword']
+        if keyword:
+            products = Product.objects.order_by('-created_at').filter(description__icontains=keyword)
+            product_count = products.count()
+
+    context={
+        'products': products,
+        'product_count': product_count,
+    }
+    return render(request, 'store/store.html', context)
