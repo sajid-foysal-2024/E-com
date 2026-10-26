@@ -1,6 +1,5 @@
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 
 from .models import Account
 
@@ -19,6 +18,14 @@ class RegisterForm(forms.ModelForm):
         model = Account
         fields = ['first_name','last_name','email','password','phone_number','password']
 
+    def clean(self):
+        cleaned_data = super(RegisterForm, self).clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if password != confirm_password:
+            raise forms.ValidationError("Passwords don't match !")
+
 
     def __init__(self, *args, **kwargs):
         super(RegisterForm,self).__init__(*args, **kwargs)
@@ -30,3 +37,8 @@ class RegisterForm(forms.ModelForm):
         self.fields['confirm_password'].widget.attrs['class'] = 'form-control'
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+
+
+
+
+
